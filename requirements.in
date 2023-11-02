@@ -1,0 +1,19 @@
+# DASH
+dash
+dash-bootstrap-components
+dash_bootstrap_templates
+dash-ag-grid
+
+flask_cors
+
+# TO PING THE BACKEND
+redis
+
+# FILE UPLOAD and VALID EXCEL CHECK
+openpyxl
+
+# DATA PROCESSING
+pandas
+
+# DISPLAY
+humanize

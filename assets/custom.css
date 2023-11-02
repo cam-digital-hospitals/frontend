@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
+
+@media (min-width: 992px) { /* bootstrap lg and larger */
+    .dropdown-menu[data-bs-popper], .dropstart .dropdown-menu[data-bs-popper] {
+        margin: 0;
+    }
+
+    .dropdown:hover>.dropdown-menu, .dropstart:hover>.dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-toggle, .dropdown>.dropdown-toggle, .dropstart>.dropdown-toggle {
+        /*Without this, clicking will make it sticky*/
+        pointer-events: none;
+    }
+
+    .dropdown-toggle, .dropdown>.dropdown-toggle, .dropstart>.dropdown-toggle {
+        /*Without this, clicking will make it sticky*/
+        pointer-events: none;
+    }
+
+    .dropdown-toggle>a, .dropdown>.dropdown-toggle>a, .dropstart>.dropdown-toggle>a {
+        /*Without this, clicking will make it sticky*/
+        pointer-events: auto;
+    }
+
+    .dropstart>.nav-link {
+        color: black !important;
+    }
+}
+
+.breadcrumb {
+    padding: var(--bs-breadcrumb-padding-y) 0 !important;
+}
+
+.dbc input:not([type=radio]):not([type=checkbox]):disabled{
+    background-color: #eee !important;
+    border-color: #ccc;
+    color: #ccc !important;
+}
+
+.dbc input:not([type=radio]):not([type=checkbox]):disabled::placeholder {
+    background-color: #eee !important;
+    color: #eee !important /* same as background-color to hide text */
+}
+
+.modal-header {
+    border-bottom: none !important;
+}
+
+.modal-footer {
+    border-top: none !important;
+}
+
+.emoji {
+    font-family: 'Noto Color Emoji', sans-serif;
+}
