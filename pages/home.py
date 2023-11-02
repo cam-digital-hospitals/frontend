@@ -8,8 +8,8 @@ from dash.development.base_component import Component
 from redis import Redis
 from redis.exceptions import RedisError
 
-from ..conf import REDIS_HOST, REDIS_PORT
-from . import templates
+from dash_app.conf import REDIS_HOST, REDIS_PORT
+from pages import templates
 
 REDIS_CONN = Redis(
     host=REDIS_HOST,

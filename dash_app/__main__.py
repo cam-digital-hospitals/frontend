@@ -12,7 +12,8 @@ app = dash.Dash(
         dbc.themes.FLATLY,
         dbc.icons.FONT_AWESOME
     ],
-    suppress_callback_exceptions=True
+    suppress_callback_exceptions=True,
+    pages_folder='../pages'
 )
 
 
