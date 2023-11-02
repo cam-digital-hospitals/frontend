@@ -1,6 +1,6 @@
 """Configuration settings for the hpath app."""
 
-REDIS_HOST = 'localhost'  # or name of docker service in same network
+REDIS_HOST = 'redis'  # or name of docker service in same network
 """Hostname for the Redis server."""
 
 REDIS_PORT = 6379
@@ -12,3 +12,5 @@ HPATH_SIM_HOST = 'hpath-restful'
 
 HPATH_SIM_PORT = '5000'
 """Port for the histopathology simulation server."""
+
+SENSOR_HOST = 'http://129.169.49.180/api/sensorsdt/'

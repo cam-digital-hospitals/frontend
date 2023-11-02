@@ -7,8 +7,9 @@ from dash import Input, Output, callback, dcc, html
 from dash.development.base_component import Component
 from redis import Redis
 from redis.exceptions import RedisError
+import requests
 
-from dash_app.conf import REDIS_HOST, REDIS_PORT
+from dash_app.conf import REDIS_HOST, REDIS_PORT, SENSOR_HOST
 from pages import templates
 
 REDIS_CONN = Redis(
@@ -144,7 +145,7 @@ def card_status() -> dbc.Card:
         templates.card_header('Server status', 'heart-pulse', color='#c00'),
         html.Div(
             [
-                html.Span('❌ ', className='emoji', id='homepage-status-bullet-sensors'),
+                html.Span('❓ ', className='emoji', id='homepage-status-bullet-sensors'),
                 'Sensor server'
             ],
             **status_style
@@ -152,7 +153,7 @@ def card_status() -> dbc.Card:
         ),
         html.Div(
             [
-                html.Span('✔ ', className='emoji', id='homepage-status-bullet-hpath'),
+                html.Span('❓ ', className='emoji', id='homepage-status-bullet-hpath'),
                 'Histopathology simulation server'
             ],
             **status_style
@@ -224,7 +225,7 @@ layout = dbc.Stack(
     Output('homepage-status-bullet-sensors', 'children'),
     Output('homepage-status-bullet-hpath', 'children'),
     Input('check-status', 'n_intervals'),
-    prevent_initial_call=True
+    # prevent_initial_call=True
 )
 def status_bullet_colors(_) -> tuple[Component, Component]:
     """Update the server status messages on the home page. Triggered
@@ -234,11 +235,18 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
         redis_ok = True
     except RedisError:
         redis_ok = False
+    
+    try:
+        response = requests.get(SENSOR_HOST)
+        sensor_ok = response.status_code == 200
+    except:
+        sensor_ok = False
 
     logger = logging.getLogger('dash.dash')
+    logger.info("ping sensor-server: %s", 'OK' if sensor_ok else 'FAIL')
     logger.info("ping redis: %s", 'OK' if redis_ok else 'FAIL')
 
     return (
-        '❌ ',
+        '✔ ' if sensor_ok else '❌ ',
         '✔ ' if redis_ok else '❌ '
     )

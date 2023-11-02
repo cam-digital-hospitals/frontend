@@ -8,6 +8,7 @@ flask_cors
 
 # TO PING THE BACKEND
 redis
+requests
 
 # FILE UPLOAD and VALID EXCEL CHECK
 openpyxl
