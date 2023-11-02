@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r /requirements.txt
 COPY /frontend /app/frontend
 
 WORKDIR /app/frontend
-CMD python app.py
+CMD python -m dash_app
