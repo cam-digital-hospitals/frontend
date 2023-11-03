@@ -235,11 +235,11 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
         redis_ok = True
     except RedisError:
         redis_ok = False
-    
+
     try:
-        response = requests.get(SENSOR_HOST)
+        response = requests.get(SENSOR_HOST, timeout=5)
         sensor_ok = response.status_code == 200
-    except:
+    except requests.RequestException:
         sensor_ok = False
 
     logger = logging.getLogger('dash.dash')
