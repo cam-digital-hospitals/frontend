@@ -7,6 +7,7 @@ from http import HTTPStatus
 import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+from dash_compose import composition
 import humanize
 # import openpyxl as oxl
 import pandas as pd
@@ -93,160 +94,8 @@ sc_grid_default_coldefs = {
 ##                                                                 ##
 #####################################################################
 
-
-def _layout():
-    return dbc.Stack(
-        [
-            templates.breadcrumb(
-                ['Home', 'Histopathology: Simulator', 'Submit Simulation Job'],
-                ['hpath', 'submit']
-            ),
-            templates.page_title('Histopathology: Submit Simulation Job(s)'),
-            dbc.Card(
-                [
-                    templates.card_header('Upload scenario configuration file(s)', 'upload'),
-                    alert_row,
-                    dbc.Row([upload_btn_col, download_template_btn_col],
-                            class_name='mx-0 mt-3 g-2'),
-                    analysis_info_row,
-                    dbc.Row(
-                        [analysis_name_input, sim_length_inputs],
-                        align="start",
-                        justify="start",
-                        className='mx-0 mt-1 g-4'
-                    ),
-                    grid_info_row,
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                dag.AgGrid(
-                                    id='hpath-submitter-grid',
-                                    rowData=sc_df_init.to_dict('records'),
-                                    columnDefs=sc_grid_coldefs,
-                                    defaultColDef=sc_grid_default_coldefs,
-                                    dashGridOptions={
-                                        "singleClickEdit": True,
-                                        "enterMovesDown": True,
-                                        "enterMovesDownAfterEdit": True,
-                                        "stopEditingWhenCellsLoseFocus": True,
-                                        'rowSelection': 'multiple'
-                                    }
-                                ),
-                                width=12
-                            )
-                        ],
-                        class_name='mx-0 mt-1'
-                    ),
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    dbc.Button(
-                                        'Delete selected rows',
-                                        id='hpath-submitter-delete-btn',
-                                        color='danger'
-                                    )
-                                ],
-                                width='auto',
-                                class_name='m-0'
-                            ),
-                            dbc.Col(
-                                [
-                                    dbc.Button(
-                                        'Submit',
-                                        id='hpath-submitter-submit-btn',
-                                        disabled=True,
-                                        color='secondary'
-                                    )
-                                ],
-                                width='auto',
-                                class_name='m-0'
-                            )
-                        ],
-                        class_name='mx-0 mt-3 g-2'
-                    ),
-                ],
-                class_name='p-3'
-            ),
-            submit_msg_modal
-        ]
-    )
-
-
-alert_row = dbc.Row(
-    [
-        dbc.Col(
-            dbc.Alert(
-                "Placeholder",
-                id='hpath-submitter-alert',
-                color='secondary',
-                dismissable=True,
-                is_open=False,
-                class_name='m-0'
-            ),
-            class_name='m-0 p-0',
-            width=12,
-        )
-    ],
-    class_name='mx-0 mt-1'
-)
-"""dbc.Row containing an Alert component for showing status messages upon uploading a
-file or files."""
-
-upload_btn_col = dbc.Col(
-    dcc.Upload(
-        dbc.Button(
-            [
-                html.Span(className='fa fa-upload'),
-                '\u2002Upload file(s)'
-            ],
-            id='hpath-submitter-btn-select-files',
-            class_name='m-0'
-        ),
-        id='hpath-submitter-upload-files',
-        accept='.xlsx',
-        multiple=True,
-        className='m-0',
-    ),
-    class_name='m-0',
-    width="auto"
-)
-"""dbc.Col holding the "Upload file(s)" button."""
-
-download_template_btn_col = dbc.Col(
-    [
-        dbc.Button(
-            [
-                html.Span(className='fa fa-download'),
-                '\u2002Download template file'
-            ],
-            id='hpath-download-template-btn',
-            class_name='m-0'
-        ),
-        dcc.Download(
-            id='hpath-download-file',
-        ),
-    ],
-    class_name='m-0',
-    width="auto"
-)
-"""dbc.Col holding the "Download template file" button."""
-
-analysis_info_row = dbc.Row(
-    dbc.Col(
-        [
-            'If multiple files are uploaded, a ',
-            html.B('multi-scenario analysis '),
-            'will be created. Enter an analysis name below '
-            '(disabled for single-scenario analyses).',
-        ]
-    ),
-    class_name='mx-0 mt-3'
-)
-"""Shows static info text regarding analysis names."""
-
 unit_selector = dbc.Select(
-    ["Weeks", "Days", "Hours"],
+    options=["Weeks", "Days", "Hours"],
     value="Weeks",
     id='hpath-submitter-sim-length-units',
     style={'width': '100px', 'max-width': '100px'},
@@ -270,59 +119,139 @@ sim_length_inputs: dbc.Col = templates.labelled_numeric(
 )
 """Input group selecting the unit of the inputted simulation length."""
 
-grid_info_row = dbc.Row(
-    dbc.Col(
-        [
-            'The scenario names defined in the table below will be used to '
-            'retrieve simulation results. Double-click on a scenario name to '
-            'edit it.  Scenarios appear in the multi-scenario report in ',
-            html.Span(
-                'alphanumerical order ',
-                style={'color': 'red', 'font-weight': 'bold'},
-            ),
-            'based on the assigned scenario names.',
-            html.Br(),
-            'Default scenario names are provided based on the uploaded filenames, '
-            'with “ copy” appended in event of a name clash.'
-        ],
-        width='auto'
-    ),
-    class_name='mx-0 mt-3'
-)
-"""Static text regarding how to use the AG Grid component for previewing scenarios to submit and
-editing names."""
+@composition
+def layout():
+    """Page layout."""
+    with dbc.Stack() as ret:
+        yield templates.breadcrumb(
+            ['Home', 'Histopathology: Simulator', 'Submit Simulation Job'],
+            ['hpath', 'submit']
+        )
+        yield templates.page_title('Histopathology: Submit Simulation Job(s)')
+        with dbc.Card(class_name='p-3'):
+            yield templates.card_header('Upload scenario configuration file(s)', 'upload')
 
-submit_msg_modal = dbc.Modal(
-    [
-        dbc.ModalHeader(),
-        dbc.ModalBody(
-            'This is a modal dialog',
-            id='hpath-submitter-modal-body',
-            class_name='py-0'
-        ),
-        dbc.ModalFooter(
-            [
-                dbc.Button(
-                    'View Results',
+            # Row for alert messages
+            with dbc.Row(class_name='mx-0 mt-1'):
+                with dbc.Col(class_name='m-0 p-0', width=12):
+                    yield dbc.Alert(
+                        id='hpath-submitter-alert',
+                        color='secondary',
+                        dismissable=True,
+                        is_open=False,
+                        class_name='m-0'
+                    )
+
+            # Row with Upload and Download Template buttons
+            with dbc.Row(class_name='mx-0 mt-3 g-2'):
+
+                # Upload file(s)
+                with dbc.Col(class_name='m-0', width="auto"):
+                    with dcc.Upload(
+                        id='hpath-submitter-upload-files',
+                        accept='.xlsx',
+                        multiple=True,
+                        className='m-0'
+                    ):
+                        with dbc.Button(
+                            id='hpath-submitter-btn-select-files', class_name='m-0'
+                        ):
+                            yield html.Span(className='fa fa-upload')
+                            yield '\u2002Upload file(s)'
+
+                # Download Template file
+                with dbc.Col(class_name='m-0', width="auto"):
+                    with dbc.Button(
+                        id='hpath-submitter-btn-select-files', class_name='m-0'
+                    ):
+                        yield html.Span(className='fa fa-download')
+                        yield '\u2002Download template file'
+                    yield dcc.Download(id='hpath-download-file')
+
+            # Row with info regarding multi-scenario analyses
+            with dbc.Row(class_name='mx-0 mt-3'):
+                with dbc.Col(width='auto'):
+                    yield 'If multiple files are uploaded, a '
+                    yield html.B('multi-scenario analysis ')
+                    yield 'will be created. Enter an analysis name below '\
+                        '(disabled for single-scenario analyses).'
+
+            # Row for setting Analysis name and simulation lengths
+            with dbc.Row(align="start", justify="start", className='mx-0 mt-1 g-4'):
+                yield analysis_name_input
+                yield sim_length_inputs
+
+            # Row with info on using the AG Grid element
+            with dbc.Row(class_name='mx-0 mt-3'):
+                with dbc.Col(width='auto'):
+                    yield 'The scenario names defined in the table below will be used to '\
+                        'retrieve simulation results. Double-click on a scenario name to '\
+                        'edit it.  Scenarios appear in the multi-scenario report in '
+                    with html.Span(style={'color': 'red', 'font-weight': 'bold'}):
+                        yield 'alphanumerical order '
+                    yield html.Br()
+                    yield 'Default scenario names are provided based on the uploaded filenames, '\
+                        'with “ copy” appended in event of a name clash.'
+
+            # Scenarios AG Grid
+            with dbc.Row(class_name='mx-0 mt-1'):
+                with dbc.Col(width=12):
+                    yield dag.AgGrid(
+                        id='hpath-submitter-grid',
+                        rowData=sc_df_init.to_dict('records'),
+                        columnDefs=sc_grid_coldefs,
+                        defaultColDef=sc_grid_default_coldefs,
+                        dashGridOptions={
+                            "singleClickEdit": True,
+                            "enterMovesDown": True,
+                            "enterMovesDownAfterEdit": True,
+                            "stopEditingWhenCellsLoseFocus": True,
+                            'rowSelection': 'multiple'
+                        }
+                    )
+
+            # Row with Delete and Submit buttions
+            with dbc.Row(class_name='mx-0 mt-3 g-2'):
+                with dbc.Col(width='auto', class_name='m-0'):
+                    yield dbc.Button(
+                        'Delete selected rows',
+                        id='hpath-submitter-delete-btn',
+                        color='danger'
+                    )
+                with dbc.Col(width='auto', class_name='m-0'):
+                    yield dbc.Button(
+                        'Submit',
+                        id='hpath-submitter-submit-btn',
+                        disabled=True,
+                        color='secondary'
+                    )
+
+        # Modal for Submit callback results
+        #yield submit_msg_modal
+        with dbc.Modal(
+            id='hpath-submitter-modal',
+            is_open=False,
+            backdrop='static',
+            size='xl',
+            fullscreen='lg-down'
+        ):
+            yield dbc.ModalHeader()
+            with dbc.ModalBody(
+                id='hpath-submitter-modal-body',
+                class_name='py-0'
+            ):
+                yield 'This is a modal dialog'
+            with dbc.ModalFooter():
+                with dbc.Button(
                     id='hpath-submitter-view-results-btn',
                     className="ms-auto",
                     href='/hpath/view'
-                ),
-                dbc.Button(
-                    "Close", id="hpath-submitter-modal-close", n_clicks=0
-                )
-            ]
-        )
-    ],
-    id='hpath-submitter-modal',
-    is_open=False,
-    backdrop='static',
-    size='xl',
-    fullscreen='lg-down'
-)
-"""Modal dialog component for showing results of pressing the Submit button."""
+                ):
+                    yield 'View Results'
+                with dbc.Button(id="hpath-submitter-modal-close", n_clicks=0):
+                    yield 'Close'
 
-layout = _layout()
+    return ret
 
 ###############################################################################################
 ##                                                                                            ##
@@ -464,8 +393,8 @@ def manage_grid_data(contents, _, names, old_sc_data: dict):
 
 @callback(
     Output('hpath-submitter-modal', 'is_open'),
-    Output('hpath-submitter-modal-body', 'children'),
-    Output('hpath-submitter-view-results-btn', 'style'),
+    Output('hpath-submitter-modal-body', 'children'),     # Modal message
+    Output('hpath-submitter-view-results-btn', 'style'),  # Show/hide "View Results" button
     Input('hpath-submitter-submit-btn', 'n_clicks'),
     State('hpath-submitter-grid', 'rowData'),
     State('hpath-submitter-analysis-name', 'value'),
@@ -526,18 +455,19 @@ def submit_or_close_modal(_, sc_data, analysis_name, sim_length, sim_length_unit
             f"Sucessfully created {'single' if len(sc_data) == 1 else 'multi'}-scenario analysis!",
             None
         )
-    else:
-        error_msg = [
-            html.P(
-                f"Error message received from backend server (type {response.json()['type']}): "
-            ),
-            html.Pre(response.json()['msg'])
-        ]
-        return (
-            True,
-            html.Div(error_msg, className='m-0', style={'color': 'crimson'}),
-            {'display': 'none'}
-        )
+
+    # error
+    error_msg = [
+        html.P(
+            f"Error message received from backend server (type {response.json()['type']}): "
+        ),
+        html.Pre(response.json()['msg'])
+    ]
+    return (
+        True,
+        html.Div(error_msg, className='m-0', style={'color': 'crimson'}),
+        {'display': 'none'}
+    )
 
 
 @callback(

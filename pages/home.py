@@ -5,6 +5,7 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback, dcc, html
 from dash.development.base_component import Component
+from dash_compose import composition
 from redis import Redis
 from redis.exceptions import RedisError
 import requests
@@ -20,150 +21,6 @@ REDIS_CONN = Redis(
 
 dash.register_page(__name__, title='Homepage', path='/')
 
-# pylint: disable=line-too-long
-#########################################################################################################
-##     ######   #######  ##     ## ########   #######  ##    ## ######## ##    ## ########  ######     ##
-##    ##    ## ##     ## ###   ### ##     ## ##     ## ###   ## ##       ###   ##    ##    ##    ##    ##
-##    ##       ##     ## #### #### ##     ## ##     ## ####  ## ##       ####  ##    ##    ##          ##
-##    ##       ##     ## ## ### ## ########  ##     ## ## ## ## ######   ## ## ##    ##     ######     ##
-##    ##       ##     ## ##     ## ##        ##     ## ##  #### ##       ##  ####    ##          ##    ##
-##    ##    ## ##     ## ##     ## ##        ##     ## ##   ### ##       ##   ###    ##    ##    ##    ##
-##     ######   #######  ##     ## ##         #######  ##    ## ######## ##    ##    ##     ######     ##
-#########################################################################################################
-# pylint: enable=line-too-long
-
-
-def card_sensors() -> dbc.Card:
-    """dbc.Card containing link buttons to sensor dashboards."""
-
-    button_style = {'color': 'info'}
-    children = [
-        templates.card_header('Sensors', 'tower-broadcast'),
-        dbc.Stack(
-            [
-                html.Div(
-                    id='card-sensors-status-text'
-                ),
-                dbc.Container(
-                    [
-                        dbc.Button(
-                            ['View', html.Br(), 'Sensors'],
-                            **button_style,
-                            href='/sensors'
-                        ),
-                        dbc.Button(
-                            ['View Data Connectors', html.Br(), 'and Gateways'],
-                            **button_style,
-                            href='/gateway-data-connectors'
-                        ),
-                        dbc.Button(
-                            [
-                                "2D Map",
-                                html.Br(),
-                                html.Span(className='fa fa-map-location-dot')
-                            ],
-                            **button_style,
-                            href='/sensors/2d'
-                        )
-                    ],
-                    class_name='d-flex gap-2'
-                )
-            ],
-            className='gap-2 card-text'
-        )
-    ]
-
-    return dbc.CardBody(
-        children=children,
-    )
-
-
-def card_hpath() -> dbc.Card:
-    """dbc.Card containing link to histopathology dashboards."""
-
-    cardbutton_style = {'color': 'info',  'class_name': 'card-text', 'style': {'width': '300px'}}
-    cardbutton_title_style = {'style': {'font-size': '1.0rem'}}
-    cardbutton_text_style = {'style': {'font-size': '0.7rem', 'text-align': 'justify'}}
-
-    children = [
-        templates.card_header('Histopathology', 'bacteria', color='#a09'),
-        dbc.Stack(
-            [
-                dbc.Button(
-                    [
-                        html.Div(
-                            [
-                                html.Span(className="fa fa-microchip"),
-                                '\u2002Simulator'  # en space
-                            ],
-                            **cardbutton_title_style
-                        ),
-                        html.Div(
-                            'Simulation model of Addenbrooke\'s  Hospital\'s Histopathology '
-                            'department. Visualise KPIs online, or download an report in JSON '
-                            'format.',
-                            **cardbutton_text_style
-                        )
-                    ],
-                    id='homepage-button-hpath',
-                    href='/hpath',
-                    **cardbutton_style
-                ),
-                dbc.Button(
-                    [
-                        html.Div(
-                            [
-                                html.Span(className="fa fa-diagram-project"),
-                                '\u2002Building Information Management (BIM) Model'  # en space
-                            ],
-                            **cardbutton_title_style
-                        ),
-                        html.Div(
-                            ['Set path availability and compute travel times. '
-                             'The exported Excel sheet can be inserted into a '
-                             'configuration file for the Simulator.\u2002', html.B('(TODO)')],
-                            **cardbutton_text_style
-                        )
-                    ],
-                    id='homepage-button-hpath',
-                    href='/hpath/bim',
-                    **cardbutton_style
-                ),
-            ],
-            class_name='gap-2 card-text'
-        )
-    ]
-
-    return dbc.CardBody(children=children)
-
-
-def card_status() -> dbc.Card:
-    """dbc.Card for showing server status."""
-
-    status_style = {'style': {'font-size': '0.9rem'}}
-    children = [
-        templates.card_header('Server status', 'heart-pulse', color='#c00'),
-        html.Div(
-            [
-                html.Span('❓ ', className='emoji', id='homepage-status-bullet-sensors'),
-                'Sensor server'
-            ],
-            **status_style
-
-        ),
-        html.Div(
-            [
-                html.Span('❓ ', className='emoji', id='homepage-status-bullet-hpath'),
-                'Histopathology simulation server'
-            ],
-            **status_style
-        ),
-        dcc.Interval(id='check-status', interval=5000)
-    ]
-    return dbc.CardBody(
-        children=children
-    )
-
 #####################################################################
 ##                                                                 ##
 ##    ##          ###    ##    ##  #######  ##     ## ########     ##
@@ -176,37 +33,120 @@ def card_status() -> dbc.Card:
 ##                                                                 ##
 #####################################################################
 
-
 auto_col_style = {'width': 'auto', 'class_name': 'p-0'}
 
-layout = dbc.Stack(
-    [
-        dbc.Breadcrumb(
+
+@composition
+def page_layout():
+    """The page layout, to be inserted into the multi-page Dash app."""
+    with dbc.Stack() as stack:
+        yield dbc.Breadcrumb(
             items=[
                 {'label': 'Home', 'active': True},
             ],
             class_name='mx-0'
-        ),
-        templates.page_title('CUH Digital Hospitals Dashboards Demo'),
-        dbc.Row(
-            [
-                dbc.Col(
-                    dbc.Card([card_sensors()], style={'height': '100%'}),
-                    **auto_col_style
-                ),
-                dbc.Col(
-                    dbc.Card([card_hpath()], style={'height': '100%'}),
-                    **auto_col_style
-                ),
-                dbc.Col(
-                    dbc.Card([card_status()], style={'height': '100%'}),
-                    **auto_col_style
-                )
-            ],
-            class_name='d-flex gap-3 mx-0'
         )
-    ]
-)
+        yield templates.page_title('CUH Digital Hospitals Dashboards Demo')
+        with dbc.Row(class_name='d-flex gap-3 mx-0'):
+
+            # SENSORS
+            with dbc.Col(**auto_col_style):
+                with dbc.Card(style={'height': '100%'}):
+                    button_style = {'color': 'info'}
+
+                    with dbc.CardBody():
+                        yield templates.card_header('Sensors', 'tower-broadcast')
+                        with dbc.Stack(className='gap-2 card-text'):
+                            with dbc.Container(class_name='d-flex gap-2'):
+                                yield dbc.Button(
+                                    ['View', html.Br(), 'Sensors'],
+                                    **button_style,
+                                    href='/sensors'
+                                )
+                                yield dbc.Button(
+                                    ['View Data Connectors', html.Br(), 'and Gateways'],
+                                    **button_style,
+                                    href='/gateway-data-connectors'
+                                )
+                                yield dbc.Button(
+                                    [
+                                        "2D Map",
+                                        html.Br(),
+                                        html.Span(className='fa fa-map-location-dot')
+                                    ],
+                                    **button_style,
+                                    href='/sensors/2d'
+                                )
+
+            # HISTOPATHOLOGY SIMULATION MODEL
+            with dbc.Col(**auto_col_style):
+                with dbc.Card(style={'height': '100%'}):
+                    button_style = {
+                        'color': 'info',
+                        'class_name': 'card-text',
+                        'style': {'width': '300px'}
+                    }
+                    button_title_style = {'style': {'font-size': '1.0rem'}}
+                    button_text_style = {
+                        'style': {'font-size': '0.7rem', 'text-align': 'justify'}
+                    }
+
+                    with dbc.CardBody():
+                        yield templates.card_header('Histopathology', 'bacteria', color='#a09')
+                        with dbc.Stack(className='gap-2 card-text'):
+                            with dbc.Button(
+                                id='homepage-button-hpath',
+                                href='/hpath',
+                                **button_style
+                            ):
+                                with html.Div(**button_title_style):
+                                    yield html.Span(className="fa fa-microchip")
+                                    yield '\u2002Simulator'  # en space
+                                with html.Div(**button_text_style):
+                                    yield (
+                                        'Simulation model of Addenbrooke\'s  Hospital\'s '
+                                        'Histopathology  department. Visualise KPIs online, or '
+                                        'download an report in JSON format.'
+                                    )
+
+                            with dbc.Button(
+                                id='homepage-button-hpath',
+                                href='/hpath/bim',
+                                **button_style
+                            ):
+                                with html.Div(**button_title_style):
+                                    yield html.Span(className="fa fa-diagram-project")
+                                    yield '\u2002Building Information Management (BIM) Model'
+                                with html.Div(**button_text_style):
+                                    yield (
+                                        'Set path availability and compute travel times. '
+                                        'The exported Excel sheet can be inserted into a '
+                                        'configuration file for the Simulator.\u2002'
+                                    )
+
+            # SERVER STATUS
+            with dbc.Col(**auto_col_style):
+                with dbc.Card(style={'height': '100%'}):
+                    status_style = {'style': {'font-size': '0.9rem'}}
+
+                    with dbc.CardBody():
+                        yield templates.card_header('Server status', 'heart-pulse', color='#c00')
+                        with html.Div(**status_style):
+                            yield html.Span(
+                                '❓ ', className='emoji', id='homepage-status-bullet-sensors'
+                            )
+                            yield 'Sensor server'
+                        with html.Div(**status_style):
+                            yield html.Span(
+                                '❓ ', className='emoji', id='homepage-status-bullet-hpath'
+                            )
+                            yield 'Histopathology simulation server'
+            yield dcc.Interval(id='check-status', interval=5000)
+
+    return stack
+
+
+layout = page_layout()
 
 ###############################################################################################
 ##                                                                                            ##

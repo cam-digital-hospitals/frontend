@@ -6,6 +6,7 @@ from math import isnan
 import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+from dash_compose import composition
 import pandas as pd
 from dash import Input, Output, callback, html
 import pytz
@@ -82,21 +83,29 @@ sc_grid_coldefs = [
 
 auto_col_style = {'width': 'auto', 'class_name': 'p-0'}
 
-btn_refresh = dbc.Row(
-    dbc.Col(
-        dbc.Button(
-            ['Refresh\u2002', html.Span(className='fa fa-arrows-rotate')],
-            id='btn-scenarios-refresh',
-            color='info',
-            class_name='mb-3',
-            style={'width': 'auto'}
-        ),
-        style=auto_col_style)
-)
 
-layout = dbc.Stack(
-    [
-        templates.breadcrumb(
+@composition
+def btn_refresh():
+    """Refresh button for updating scenario statuses.
+    TODO: auto-refresh with dcc.Interval?
+    """
+    with dbc.Row() as ret:
+        with dbc.Col(style=auto_col_style):
+            yield dbc.Button(
+                ['Refresh\u2002', html.Span(className='fa fa-arrows-rotate')],
+                id='btn-scenarios-refresh',
+                color='info',
+                class_name='mb-3',
+                style={'width': 'auto'}
+            )
+    return ret
+
+
+@composition
+def layout():
+    """Page layout."""
+    with dbc.Stack() as ret:
+        yield templates.breadcrumb(
             [
                 'Home',
                 'Histopathology: Simulator',
@@ -104,16 +113,15 @@ layout = dbc.Stack(
                 'Single-Scenario Results'
             ],
             ['hpath', 'view', 'single']
-        ),
-        templates.page_title('Histopathology: Single-Scenario Results'),
-        btn_refresh,
-        dag.AgGrid(
+        )
+        yield templates.page_title('Histopathology: Single-Scenario Results')
+        yield btn_refresh()
+        yield dag.AgGrid(
             id='hpath-view-scenarios',
             rowData=sc_df_init.to_dict('records'),
             columnDefs=sc_grid_coldefs
         )
-    ]
-)
+    return ret
 
 ###############################################################################################
 ##                                                                                            ##
@@ -130,7 +138,9 @@ layout = dbc.Stack(
 
 LONDON = pytz.timezone('Europe/London')
 
+
 def format_time(ts: float):
+    """Format a UNIX timestamp in the format 2023-11-11 11:11:11 GMT (or BST for summer time)."""
     return datetime.utcfromtimestamp(ts).astimezone(LONDON).strftime('%Y-%m-%d %H:%M:%S %Z')
 
 
@@ -162,5 +172,5 @@ def load_scenarios(n_clicks) -> None:
         logger.info(scenarios)
         return scenarios
     except:
-        # TODO: display error message on screen
+        # TODO: display error messages on screen
         return sc_df_init

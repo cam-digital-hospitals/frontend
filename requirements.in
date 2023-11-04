@@ -2,6 +2,7 @@
 dash
 dash-bootstrap-components
 dash_bootstrap_templates
+dash-compose
 dash-ag-grid
 
 flask_cors

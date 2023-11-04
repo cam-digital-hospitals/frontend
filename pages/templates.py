@@ -1,98 +1,78 @@
 """Template Dash components for the dashboards app."""
-from dash import html
 import dash_bootstrap_components as dbc
+from dash import html
+from dash_compose import composition
 
 # All page contents are to be rendered as `dbc.Stack`s
 # and should use dbc.Row and dbc.Col for layout
 
-
+@composition
 def card_header(title, icon=None, *, pad_below=True, regular=False, color=None) -> html.Div:
     """Card or Button header with optional icon.
 
     If there is no body below the header, set pad_below to False.
     """
-    children = [html.Span(title, className='px-1')]
-    if icon is not None:
-        children.insert(
-            0,
-            html.Span(
+    with html.Div(
+        className='card-title' if pad_below else '',
+        style={'font-size': '1.6rem'}
+    ) as ret:
+        if icon is not None:
+            yield html.Span(
                 className=(
                     f'fa-regular fa-{icon} px-1' if regular
                     else f'fa fa-{icon} px-1'
                 ),
                 style={'color': color} if color is not None else None
-            ),
-        )
-    return html.Div(
-        children=children,
-        className='card-title' if pad_below else '',
-        style={'font-size': '1.6rem'}
-    )
+            )
+            yield html.Span(title, className='px-1')
 
+    return ret
 
+@composition
 def labelled_input(label, id, *, align='start', disabled=False, prompt=None) -> dbc.Col:
     """Text input with label as a dbc.Col, for use in a dbc.Row."""
-    return dbc.Col(
-        dbc.Row(
-            [
-                dbc.Col(
-                    dbc.Label([html.B(label), ': '], class_name='m-0'),
-                    width="auto",
-                    class_name='pe-0'
-                ),
-                dbc.Col(
-                    dbc.Input(
-                        id=id,
-                        disabled=disabled,
-                        placeholder=prompt
-                    ),
-                    width="auto"
+    with dbc.Col(width='auto', class_name='m-0') as ret:
+        with dbc.Row(align=align):
+            with dbc.Col(
+                width="auto",
+                class_name='pe-0'
+            ):
+                yield dbc.Label([html.B(label), ': '], class_name='m-0')
+            with dbc.Col(width="auto"):
+                yield dbc.Input(
+                    id=id,
+                    disabled=disabled,
+                    placeholder=prompt
                 )
-            ],
-            align=align
-        ),
-        width='auto',
-        class_name='m-0'
-    )
+
+    return ret
 
 
+@composition
 def labelled_numeric(
         label, id, *,
         disabled=False, init=0,
         unit_selector=None,
 ) -> dbc.Col:
     """Numeric input with label as a dbc.Col, for use in a dbc.Row."""
-    row_components = [
-        dbc.Col(
-            dbc.Label([html.B(label), ': '], class_name='m-0'),
-            width="auto",
-            class_name='pe-0'
-        ),
-        dbc.Col(
-            dbc.Input(
-                id=id,
-                disabled=disabled,
-                type="number",
-                min=0,
-                value=init,
-                style={'width': '100px', 'max-width': '100px'},
-            ),
-            width='auto',
-            class_name='pe-0',
-        ),
-    ]
-    if unit_selector is not None:
-        row_components.append(dbc.Col(unit_selector, class_name='ps-0'))
 
-    return dbc.Col(
-        dbc.Row(
-            row_components,
-            align="start",
-            justify="start"
-        ),
-        width='auto',
-        class_name='m-0'
-    )
+    with dbc.Col(width='auto', class_name='m-0') as ret:
+        with dbc.Row(align="start", justify="start"):
+            with dbc.Col(width="auto", class_name='pe-0'):
+                yield dbc.Label([html.B(label), ': '], class_name='m-0')
+            with dbc.Col(width="auto", class_name='pe-0'):
+                yield dbc.Input(
+                    id=id,
+                    disabled=disabled,
+                    type="number",
+                    min=0,
+                    value=init,
+                    style={'width': '100px', 'max-width': '100px'},
+                )
+            if unit_selector is not None:
+                yield dbc.Col(unit_selector, class_name='ps-0')
+
+    return ret
 
 
 def breadcrumb(labels, path_fragments) -> dbc.Breadcrumb:
@@ -110,16 +90,10 @@ def breadcrumb(labels, path_fragments) -> dbc.Breadcrumb:
     items[-1]['active'] = True
     return dbc.Breadcrumb(items=items, class_name='mx-0')
 
-
+@composition
 def page_title(title_str) -> dbc.Row:
     """Renders the page title as a dbc.Row, to be inserted into the main dbc.Stack of the page."""
-    return dbc.Row(
-        [
-            dbc.Col(
-                [
-                    html.H1(title_str, style={'font-size': '2.2rem'})
-                ],
-                width=12
-            )
-        ]
-    )
+    with dbc.Row() as ret:
+        with dbc.Col(width=12):
+            yield html.H1(title_str, style={'font-size': '2.2rem'})
+    return ret
