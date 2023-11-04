@@ -10,7 +10,7 @@ from redis import Redis
 from redis.exceptions import RedisError
 import requests
 
-from dash_app.conf import REDIS_HOST, REDIS_PORT, SENSOR_HOST
+from dash_app.conf import REDIS_HOST, REDIS_PORT, SENSOR_HOST, HPATH_RESTFUL_HOST
 from pages import templates
 
 REDIS_CONN = Redis(
@@ -177,6 +177,12 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
         redis_ok = False
 
     try:
+        response = requests.get(HPATH_RESTFUL_HOST, timeout=5)
+        hpath_rest_ok = response.status_code == 200
+    except requests.RequestException:
+        hpath_rest_ok = False
+
+    try:
         response = requests.get(SENSOR_HOST, timeout=5)
         sensor_ok = response.status_code == 200
     except requests.RequestException:
@@ -188,5 +194,5 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
 
     return (
         '✔ ' if sensor_ok else '❌ ',
-        '✔ ' if redis_ok else '❌ '
+        '✔ ' if redis_ok and hpath_rest_ok else '❌ '
     )

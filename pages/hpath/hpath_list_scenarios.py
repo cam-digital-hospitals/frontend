@@ -12,7 +12,7 @@ from dash import Input, Output, callback, html
 import pytz
 import requests
 
-from dash_app.conf import HPATH_SIM_HOST, HPATH_SIM_PORT
+from dash_app.conf import HPATH_RESTFUL_HOST
 from pages import templates
 
 dash.register_page(
@@ -155,7 +155,7 @@ def load_scenarios(n_clicks) -> None:
 
     try:
         response = requests.get(
-            url=f'http://{HPATH_SIM_HOST}:{HPATH_SIM_PORT}/scenarios/',
+            url=f'{HPATH_RESTFUL_HOST}/scenarios/',
             timeout=10
         )
         assert response.status_code == HTTPStatus.OK

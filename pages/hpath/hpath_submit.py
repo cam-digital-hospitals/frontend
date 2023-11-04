@@ -14,15 +14,8 @@ import pandas as pd
 import requests
 from dash import Input, Output, State, callback, dcc, html
 
-from dash_app.conf import HPATH_SIM_HOST, HPATH_SIM_PORT
+from dash_app.conf import HPATH_RESTFUL_HOST
 from pages import templates
-
-# from hpath_backend import db
-# from hpath_backend.config import Config
-# from hpath_backend.job_queue import HPATH_SIM_QUEUE
-# from hpath_backend.simulate import simulate
-# from hpath_backend.types import HPathConfigParams, HPathSharedParams
-
 
 dash.register_page(__name__, title='Histopathology: Submit Scenarios', path='/hpath/submit')
 
@@ -428,7 +421,7 @@ def submit_or_close_modal(_, sc_data, analysis_name, sim_length, sim_length_unit
 
     try:
         response = requests.post(
-            url=f'http://{HPATH_SIM_HOST}:{HPATH_SIM_PORT}/submit/',
+            url=f'{HPATH_RESTFUL_HOST}/submit/',
             json={
                 'params': params,
                 'scenarios': sc_data

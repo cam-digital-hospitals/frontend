@@ -7,10 +7,8 @@ REDIS_PORT = 6379
 """Port for the Redis server, default 6379 for unaltered Docker container
 (https://hub.docker.com/_/redis)."""
 
-HPATH_SIM_HOST = 'hpath-restful'
-"""Path to the histopathology simulation server."""
-
-HPATH_SIM_PORT = '5000'
-"""Port for the histopathology simulation server."""
+HPATH_RESTFUL_HOST = 'http://hpath-restful:5000/'
+"""Path to the histopathology REST server."""
 
 SENSOR_HOST = 'http://129.169.49.180/api/sensorsdt/'
+"""Path to the sensor IoT server."""
