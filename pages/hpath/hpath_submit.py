@@ -267,7 +267,7 @@ def layout():
 def download_hpath_template(_):
     """Triggered when the "Download template file" button is pressed."""
     # actual filesystem, no need for get_asset_url
-    return dcc.send_file('assets/examples/config.xlsx')
+    return dcc.send_file('static/examples/config.xlsx')
 
 
 @callback(
