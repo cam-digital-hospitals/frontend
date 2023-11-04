@@ -14,7 +14,7 @@ import pandas as pd
 import requests
 from dash import Input, Output, State, callback, dcc, html
 
-from dash_app.conf import HPATH_RESTFUL_HOST
+from conf import HPATH_RESTFUL_HOST
 from pages import templates
 
 dash.register_page(__name__, title='Histopathology: Submit Scenarios', path='/hpath/submit')

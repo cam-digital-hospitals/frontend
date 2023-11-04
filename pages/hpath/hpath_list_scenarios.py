@@ -12,7 +12,7 @@ from dash import Input, Output, callback, html
 import pytz
 import requests
 
-from dash_app.conf import HPATH_RESTFUL_HOST
+from conf import HPATH_RESTFUL_HOST
 from pages import templates
 
 dash.register_page(

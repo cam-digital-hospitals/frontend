@@ -10,7 +10,7 @@ from redis import Redis
 from redis.exceptions import RedisError
 import requests
 
-from dash_app.conf import REDIS_HOST, REDIS_PORT, SENSOR_HOST, HPATH_RESTFUL_HOST
+from conf import REDIS_HOST, REDIS_PORT, SENSOR_HOST, HPATH_RESTFUL_HOST
 from pages import templates
 
 REDIS_CONN = Redis(
