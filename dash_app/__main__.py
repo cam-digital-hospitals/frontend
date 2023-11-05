@@ -81,7 +81,7 @@ app.layout = dbc.Container(
     ],
     fluid=True,
     class_name='dbc m-0 p-0 w-auto',
-    style={'max-width': '1600px'}
+    style={'min-width': '640px', 'max-width': '1600px'}
 )
 
 if __name__ == '__main__':

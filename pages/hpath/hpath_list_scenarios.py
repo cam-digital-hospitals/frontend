@@ -47,21 +47,24 @@ sc_df_init = pd.DataFrame({
 """Defines an empty scenarios dataframe. Required because some representations of
 an empty dataframe cannot hold column metadata."""
 
-# TODO: add "Results" and "Config File" columns
+# To do:
+# [x] Add "Results" column
+# [ ] Add "Download config file" column
+
 # See: https://dash.plotly.com/dash-ag-grid/cell-renderer-components
 
 sc_grid_coldefs = [
-    {'field': 'scenario_id', 'headerName': '#', 'width': '80px'},
-    {'field': 'scenario_name', 'headerName': 'Scenario Name', 'width': '160px'},
-    {'field': 'analysis_id', 'headerName': 'Analysis #', 'width': '120px'},
-    {'field': 'analysis_name', 'headerName': 'Analysis Name', 'width': '160px'},
-    {'field': 'created', 'headerName': 'Created', 'width': '240px'},
-    {'field': 'completed', 'headerName': 'Completed', 'width': '240px'},
-    {'field': 'progress', 'headerName': 'Progress', 'width': '160px'},
+    {'field': 'scenario_id', 'headerName': '#', 'width': '80px', 'sortable': True, 'sort': 'asc'},
+    {'field': 'scenario_name', 'headerName': 'Scenario Name', 'sortable': True, 'width': '160px'},
+    {'field': 'analysis_id', 'headerName': 'Analysis #', 'width': '100px'},
+    {'field': 'analysis_name', 'headerName': 'Analysis Name', 'sortable': True, 'width': '140px'},
+    {'field': 'created', 'headerName': 'Created', 'width': '220px'},
+    {'field': 'completed', 'headerName': 'Completed', 'width': '220px'},
+    {'field': 'progress', 'headerName': 'Progress', 'width': '100px'},
     {
         'field': 'result_link',
         'headerName': 'Results',
-        'width': '160px',
+        'width': '100px',
         # resultLink function is defined in the dashAgGridComponentFunctions.js in assets folder
         "cellRenderer": "resultLinkScenario",
     }

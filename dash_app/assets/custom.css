@@ -55,3 +55,34 @@
 .emoji {
     font-family: 'Noto Color Emoji', sans-serif;
 }
+
+.tat-slider{
+    margin-top: -16px !important;
+    margin-bottom: 10px !important;
+}
+
+.tat-slider .rc-slider-rail, .tat-slider .rc-slider-track {
+    height: 14px !important;
+    top: 0 !important;
+    border-radius: 0 !important;
+}
+
+.tat-slider .rc-slider-dot {
+    height: 14px !important;
+    width: 14px !important;
+    top: -5px !important;
+    margin-left: 0 !important;
+    transform: translateX(-50%);
+}
+
+.tat-slider-good .rc-slider-track {
+    background-color: #0b7 !important;
+}
+
+.tat-slider-bad .rc-slider-track {
+    background-color: #c33 !important;
+}
+
+.tat-slider .rc-slider-dot, .tat-slider .rc-slider-handle, .tat-slider .rc-slider-mark-text {
+    cursor: default !important;
+}

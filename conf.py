@@ -12,3 +12,9 @@ HPATH_RESTFUL_HOST = 'http://hpath-restful:5000/'
 
 SENSOR_HOST = 'http://129.169.49.180/api/sensorsdt/'
 """Path to the sensor IoT server."""
+
+TAT_TARGET = {'7': 0.8, '10': 0.9, '12': 0.95, '21': 0.95}
+"""TAT target: proportion of specimens done in {n} days."""
+
+LAB_TAT_TARGET = {'3': 0.8}
+"""Lab TAT target: proportion of specimens done in {n} days."""
