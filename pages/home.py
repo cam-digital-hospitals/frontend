@@ -175,15 +175,18 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
         redis_ok = True
     except RedisError:
         redis_ok = False
+    
+    # NOTE: timeout interval must be shorter than the dcc.Interval's interval
+    # or else the React element won't update before the next callback
 
     try:
-        response = requests.get(HPATH_RESTFUL_HOST, timeout=5)
+        response = requests.get(HPATH_RESTFUL_HOST, timeout=2)
         hpath_rest_ok = response.status_code == 200
     except requests.RequestException:
         hpath_rest_ok = False
 
     try:
-        response = requests.get(SENSOR_HOST, timeout=5)
+        response = requests.get(SENSOR_HOST, timeout=2)
         sensor_ok = response.status_code == 200
     except requests.RequestException:
         sensor_ok = False
@@ -191,8 +194,9 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
     logger = logging.getLogger('dash.dash')
     logger.info("ping sensor-server: %s", 'OK' if sensor_ok else 'FAIL')
     logger.info("ping redis: %s", 'OK' if redis_ok else 'FAIL')
+    logger.info("ping hpath-rest: %s", 'OK' if hpath_rest_ok else 'FAIL')
 
     return (
         '✔ ' if sensor_ok else '❌ ',
-        '✔ ' if redis_ok and hpath_rest_ok else '❌ '
+        '✔ ' if (redis_ok and hpath_rest_ok) else '❌ '
     )
