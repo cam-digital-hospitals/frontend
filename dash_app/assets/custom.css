@@ -56,6 +56,10 @@
     font-family: 'Noto Color Emoji', sans-serif;
 }
 
+.table-striped th {
+    background-color: #aaa;
+}
+
 .tat-slider{
     margin-top: -16px !important;
     margin-bottom: 10px !important;
