@@ -175,7 +175,7 @@ def status_bullet_colors(_) -> tuple[Component, Component]:
         redis_ok = True
     except RedisError:
         redis_ok = False
-    
+
     # NOTE: timeout interval must be shorter than the dcc.Interval's interval
     # or else the React element won't update before the next callback
 

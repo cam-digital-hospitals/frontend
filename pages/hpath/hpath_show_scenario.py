@@ -56,6 +56,7 @@ def layout(scenario_id: int):
             with html.Div(style={'color': '#a00'}):
                 yield html.B('Error: ')
                 yield html.Span(f"Could not fetch scenario with ID: {scenario_id}")
+                return div  # NOTE: OMIT REST OF LAYOUT BELOW
         else:
             yield html.H2(
                 f"Scenario #{scenario_id}: {results['scenario_name']}",
@@ -172,8 +173,8 @@ def layout(scenario_id: int):
             })
             df_tat_by_stage_sorted = df_tat_by_stage.sort_values(by=['TAT'], ascending=False)
             df_tat_by_stage_sorted['TAT']\
-                = [f'{x:.2f} hours' if x >= 1 else f'{(x*60):.1f} min'
-                   for x in df_tat_by_stage_sorted['TAT']]
+                = [f'{x:.2f} hours' if x >= 1 else f'{(x*60):.1f} min'  # pylint:disable=E1136,E1137
+                   for x in df_tat_by_stage_sorted['TAT']]  # pylint:disable=E1136,E1137
             df_tat_by_stage_sorted.rename(columns={"TAT": "TAT ↓"})
 
             with dbc.Card(style={'border': 'dashed 1px darkred'}):

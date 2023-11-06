@@ -155,7 +155,7 @@ def layout():
                 # Download Template file
                 with dbc.Col(class_name='m-0', width="auto"):
                     with dbc.Button(
-                        id='hpath-submitter-btn-select-files', class_name='m-0'
+                        id='hpath-download-template-btn', class_name='m-0'
                     ):
                         yield html.Span(className='fa fa-download')
                         yield '\u2002Download template file'
@@ -429,12 +429,14 @@ def submit_or_close_modal(_, sc_data, analysis_name, sim_length, sim_length_unit
             timeout=10
         )
     except requests.exceptions.Timeout:
+        logger.error('Request timed out.')
         return (
             True,
             html.Div("Request timed out.", className='m-0', style={'color': 'crimson'}),
             {'display': 'none'}
         )
     except requests.exceptions.RequestException as exc:
+        logger.error("Request exception raised (type %s): %s", str(type(exc)), str(exc))
         error_msg = [html.P(f"Request exception raised (type {type(exc)}): "), html.Pre(str(exc))]
         return (
             True,
@@ -443,13 +445,16 @@ def submit_or_close_modal(_, sc_data, analysis_name, sim_length, sim_length_unit
         )
 
     if response.status_code == HTTPStatus.OK:
+        logger.info('OK!')
         return (
             True,
             f"Sucessfully created {'single' if len(sc_data) == 1 else 'multi'}-scenario analysis!",
             None
         )
 
-    # error
+    # else: error
+    logger.error("Error message received from backend server (type %s): ", response.json()['type'])
+    logger.error(response.json()['msg'])
     error_msg = [
         html.P(
             f"Error message received from backend server (type {response.json()['type']}): "
