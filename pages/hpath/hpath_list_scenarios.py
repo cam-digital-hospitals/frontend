@@ -47,10 +47,6 @@ sc_df_init = pd.DataFrame({
 """Defines an empty scenarios dataframe. Required because some representations of
 an empty dataframe cannot hold column metadata."""
 
-# To do:
-# [x] Add "Results" column
-# [ ] Add "Download config file" column
-
 # See: https://dash.plotly.com/dash-ag-grid/cell-renderer-components
 
 sc_grid_coldefs = [
@@ -90,7 +86,6 @@ auto_col_style = {'width': 'auto', 'class_name': 'p-0'}
 @composition
 def btn_refresh():
     """Refresh button for updating scenario statuses.
-    TODO: auto-refresh with dcc.Interval?
     """
     with dbc.Row() as ret:
         with dbc.Col(style=auto_col_style):
