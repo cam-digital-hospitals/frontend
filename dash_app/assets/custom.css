@@ -90,3 +90,11 @@
 .tat-slider .rc-slider-dot, .tat-slider .rc-slider-handle, .tat-slider .rc-slider-mark-text {
     cursor: default !important;
 }
+
+.sim-results-accordion .accordion-header button{
+    font-size: 1.6rem !important;
+}
+
+table.right-align-last td:last-of-type  {
+    text-align: right;
+}
