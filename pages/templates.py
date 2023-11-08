@@ -3,9 +3,6 @@ import dash_bootstrap_components as dbc
 from dash import html
 from dash_compose import composition
 
-# All page contents are to be rendered as `dbc.Stack`s
-# and should use dbc.Row and dbc.Col for layout
-
 @composition
 def card_header(title, icon=None, *, pad_below=True, regular=False, color=None) -> html.Div:
     """Card or Button header with optional icon.

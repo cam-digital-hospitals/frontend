@@ -2,14 +2,12 @@
 import logging
 from base64 import b64decode
 from http import HTTPStatus
-# from io import BytesIO
 
 import dash
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 from dash_compose import composition
 import humanize
-# import openpyxl as oxl
 import pandas as pd
 import requests
 from dash import Input, Output, State, callback, dcc, html
@@ -66,14 +64,14 @@ sc_grid_coldefs = [
     }
 ]
 """Defines column settings for the AG Grid object on this page.  See also
-``sc_naming_default_coldefs`` for default column settings."""
+``sc_grid_default_coldefs`` for default column settings."""
 
 sc_grid_default_coldefs = {
     "resizable": True,
     'sortable': False
 }
 """Defines default column settings for the AG Grid object on this page.  See also
-``sc_naming_coldefs`` for overrriden column settings."""
+``sc_grid_coldefs`` for overrriden column settings."""
 
 #####################################################################
 ##                                                                 ##

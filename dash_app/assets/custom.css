@@ -34,12 +34,14 @@
 }
 
 .dbc input:not([type=radio]):not([type=checkbox]):disabled{
+    /* Set appearance for a disabled input box. */
     background-color: #eee !important;
     border-color: #ccc;
     color: #ccc !important;
 }
 
 .dbc input:not([type=radio]):not([type=checkbox]):disabled::placeholder {
+    /* Set prompt text to same color as the disabled input box (hides the text). */
     background-color: #eee !important;
     color: #eee !important /* same as background-color to hide text */
 }

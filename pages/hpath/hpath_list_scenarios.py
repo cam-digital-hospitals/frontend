@@ -65,8 +65,7 @@ sc_grid_coldefs = [
         "cellRenderer": "resultLinkScenario",
     }
 ]
-"""Defines column settings for the AG Grid object on this page.  See also
-``sc_naming_default_coldefs`` for default column settings."""
+"""Defines column settings for the AG Grid object on this page."""
 
 #####################################################################
 ##                                                                 ##

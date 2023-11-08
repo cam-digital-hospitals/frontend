@@ -1,6 +1,6 @@
 """Configuration settings for the hpath app."""
 
-REDIS_HOST = 'redis'  # or name of docker service in same network
+REDIS_HOST = 'redis'
 """Hostname for the Redis server."""
 
 REDIS_PORT = 6379
