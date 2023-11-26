@@ -1,7 +1,4 @@
 __pycache__
-
-temp/
-db/
 requirements.txt
 
 # Python Environments
@@ -9,3 +6,6 @@ requirements.txt
 .venv
 env/
 venv/
+
+# Temp files
+~$*.xlsx
