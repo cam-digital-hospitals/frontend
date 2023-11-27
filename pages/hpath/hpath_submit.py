@@ -348,7 +348,6 @@ def manage_grid_data(contents, _, names, old_sc_data: dict):
 
             # update pandas DataTable (name, scenario name)
             b64string = content.split('base64,')[1]
-            # print(file_name, sc_name, len(b64string), b64string[-8:])
             new_row = pd.DataFrame({
                 'file_name': [file_name],
                 'sc_name': [sc_name],

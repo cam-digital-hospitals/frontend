@@ -14,8 +14,9 @@ requests
 # FILE UPLOAD and VALID EXCEL CHECK
 openpyxl
 
-# DATA PROCESSING
+# DATA PROCESSING AND VALIDATION
 pandas
+pydantic
 
 # DISPLAY
 humanize
