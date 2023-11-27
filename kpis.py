@@ -2,11 +2,10 @@
 
 Keep this module synced with kpis.py in `hpath-sim`.
 """
-from dataclasses import dataclass, field
-from typing import TypedDict
+from typing_extensions import TypedDict
 
+import pydantic as pyd
 from chart_datatypes import ChartData, MultiChartData
-
 
 Progress = TypedDict('Progress', {
     '7': float,
@@ -22,8 +21,7 @@ LabProgress = TypedDict('LabProgress', {
 """Returns the proportion of specimens with lab component completed within three days."""
 
 
-@dataclass(kw_only=True)
-class Report:
+class Report(pyd.BaseModel):
     """Dataclass for reporting a set of KPIs for passing to a frontend visualisation server.
     In the current implementation, this is https://github.com/lakeesiv/digital-twin"""
     overall_tat: float
@@ -37,11 +35,11 @@ class Report:
     q_length_by_resource: ChartData
     hourly_utilization_by_resource: MultiChartData
 
-    overall_tat_min: float | None = field(default=None)
-    overall_tat_max: float | None = field(default=None)
-    lab_tat_min: float | None = field(default=None)
-    lab_tat_max: float | None = field(default=None)
-    progress_min: Progress | None = field(default=None)
-    progress_max: Progress | None = field(default=None)
-    lab_progress_min: LabProgress | None = field(default=None)
-    lab_progress_max: LabProgress | None = field(default=None)
+    overall_tat_min: float | None = pyd.Field(default=None)
+    overall_tat_max: float | None = pyd.Field(default=None)
+    lab_tat_min: float | None = pyd.Field(default=None)
+    lab_tat_max: float | None = pyd.Field(default=None)
+    progress_min: Progress | None = pyd.Field(default=None)
+    progress_max: Progress | None = pyd.Field(default=None)
+    lab_progress_min: LabProgress | None = pyd.Field(default=None)
+    lab_progress_max: LabProgress | None = pyd.Field(default=None)
