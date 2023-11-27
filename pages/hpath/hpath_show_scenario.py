@@ -1,18 +1,18 @@
 """Page for showing results for a single simulation scenario."""
-import json
 import logging
 
 import dash
 import dash_bootstrap_components as dbc
-from dash import dcc, html, callback, Input, Output, State
-from dash_compose import composition
+import numpy as np
 import pandas as pd
-from plotly import express as px
 import requests
 
+from dash import Input, Output, State, callback, dcc, html
+from dash_compose import composition
+from plotly import express as px
+
 import kpis
-import util
-from conf import HPATH_RESTFUL_HOST, TAT_TARGET, LAB_TAT_TARGET
+from conf import HPATH_RESTFUL_HOST, LAB_TAT_TARGET, TAT_TARGET
 from pages import templates
 
 dash.register_page(
@@ -88,8 +88,8 @@ def layout(scenario_id: int):
             f'{HPATH_RESTFUL_HOST}/scenarios/{scenario_id}/results/',
             timeout=10
         ).json()[0]
-        report = kpis.Report(**json.loads(results['results']))
-        report_jsonstr = json.dumps(report, default=util.serialiser)
+        report = kpis.Report.model_validate_json(results['results'])
+        report_jsonstr = kpis.Report.model_dump_json(report)
     except Exception as exc:
         logger.error(str(exc))
         report = None
@@ -243,9 +243,9 @@ def layout(scenario_id: int):
             ########################################################################
 
             df_tat_by_stage = pd.DataFrame({
-                '#': [str(n) for n in range(1, len(report.tat_by_stage['x']) + 1)],
-                'Stage': report.tat_by_stage['x'],
-                'TAT': report.tat_by_stage['y']
+                '#': [str(n) for n in range(1, len(report.tat_by_stage.x) + 1)],
+                'Stage': report.tat_by_stage.x,
+                'TAT': report.tat_by_stage.y
             })
             df_tat_by_stage_sorted = df_tat_by_stage\
                 .sort_values(by=['TAT'], ascending=False)\
@@ -394,8 +394,8 @@ def layout(scenario_id: int):
                         with dbc.Col(class_name='p-2'):
                             yield dcc.Dropdown(
                                 id='multi-dropdown-wip',
-                                options=list(report.wip_by_stage['labels']),
-                                value=list(report.wip_by_stage['labels']),
+                                options=list(report.wip_by_stage.labels),
+                                value=list(report.wip_by_stage.labels),
                                 multi=True
                             )
                         with dbc.Col(width='auto', class_name='p-2'):
@@ -453,8 +453,8 @@ def layout(scenario_id: int):
 
             # Computation
             df_util = pd.DataFrame({
-                'Resource': report.utilization_by_resource['x'],
-                'Utilisation': report.utilization_by_resource['y']
+                'Resource': report.utilization_by_resource.x,
+                'Utilisation': report.utilization_by_resource.y
             })
             df_util_sorted = df_util\
                 .sort_values(by=['Utilisation'], ascending=False)\
@@ -591,6 +591,7 @@ def layout(scenario_id: int):
 ##                                                                                            ##
 ################################################################################################
 
+# CHANGE PLOT WIDTHS
 
 @callback(
     Output('view-res-alloc-layout-value', 'data'),
@@ -678,6 +679,9 @@ def select_all_util_hourly(_, options):
     """Callback when "Add all" button is clicked for Hourly Utilisation view."""
     return options
 
+# PLOTS
+
+# BUG: Plotly fails to render if too many plots/data points???
 
 PLOTS_TODO_MSG = """\
 **TODO**:
@@ -693,35 +697,82 @@ depending on whether the specified column width is 12 (wide), 6 (medium), or 4 (
 @callback(
     Output('container-res-alloc', 'children'),
     Input('multi-dropdown-res-alloc', 'value'),  # Multi-select: which plots to display
-    Input('view-res-alloc-layout-value', 'value'),  # Store: display width
+    Input('view-res-alloc-layout-value', 'data'),  # Store: display width
+    Input('select-res-alloc-timeunit', 'value'),  # Store: x-axis time unit
     State('scenario-report', 'data')  # Simulation results
 )
 @composition
-def gen_res_alloc_plots(selected, width, data):
+def gen_res_alloc_plots(selected, width, time_unit, data):
     """Generate plots for resource allocations over time."""
+    cols = 12 if width == 'wide' else 6 if width == 'medium' else 4
+    scale = 168 if time_unit == 'weeks' else 24 if time_unit == 'days' else 1
+    charts_data = kpis.Report.model_validate_json(data).resource_allocation
     with dbc.Container(fluid=True) as ret:
-        yield dcc.Markdown(PLOTS_TODO_MSG)  # TODO populate the container
+        with dbc.Row():  # Place all plots in a single Row as bootstrap will handle line wrapping
+            for res in selected:
+                df = pd.DataFrame({
+                    f'Time ({time_unit})': np.array(charts_data[res].x)/scale,
+                    '# Allocated': charts_data[res].y
+                })
+                plot = px.line(
+                    df,
+                    x=f'Time ({time_unit})',
+                    y='# Allocated',
+                    title=res
+                ).update_traces(
+                    line_shape="hv"
+                )
+                if time_unit == 'days':
+                    plot.update_xaxes(dtick=7, tick0=0)  # weekly ticks
+                with dbc.Col(width=cols):
+                    yield dcc.Graph(figure=plot)
     return ret
 
 
 @callback(
     Output('container-wip', 'children'),
     Input('multi-dropdown-wip', 'value'),  # Multi-select: which plots to display
-    Input('view-wip-layout-value', 'value'),  # Store: display width
+    Input('view-wip-layout-value', 'data'),  # Store: display width
+    Input('select-wip-timeunit', 'value'),  # Store: x-axis time unit
     State('scenario-report', 'data')  # Simulation results
 )
 @composition
-def gen_wip_plots(selected, width, data):
+def gen_wip_plots(selected, width, time_unit, data):
     """Generate plots for resource allocations over time."""
+    cols = 12 if width == 'wide' else 6 if width == 'medium' else 4
+    scale = 168 if time_unit == 'weeks' else 24 if time_unit == 'days' else 1
+    charts_data = kpis.Report.model_validate_json(data).wip_by_stage
+    df = pd.DataFrame(
+        data=np.array(charts_data.y).T,
+        index=np.array(charts_data.x)/scale,
+        columns=charts_data.labels
+    ).reset_index()
     with dbc.Container(fluid=True) as ret:
-        yield dcc.Markdown(PLOTS_TODO_MSG)  # TODO populate the container
+        with dbc.Row():  # Place all plots in a single Row as bootstrap will handle line wrapping
+            for stage in selected:
+                plot = px.line(
+                    df,
+                    x="index",
+                    y=stage,
+                    title=stage,
+                ).update_traces(
+                    line_shape="hv"
+                ).update_xaxes(
+                    title=f'Time ({time_unit})'
+                ).update_yaxes(
+                    title='Hourly mean WIP'
+                )
+                if time_unit == 'days':
+                    plot.update_xaxes(dtick=7, tick0=0)  # weekly ticks
+                with dbc.Col(width=cols):
+                    yield dcc.Graph(figure=plot)
     return ret
 
 
 @callback(
     Output('container-util-hourly', 'children'),
     Input('multi-dropdown-util-hourly', 'value'),  # Multi-select: which plots to display
-    Input('view-util-hourly-layout-value', 'value'),  # Store: display width
+    Input('view-util-hourly-layout-value', 'data'),  # Store: display width
     State('scenario-report', 'data')  # Simulation results
 )
 @composition
