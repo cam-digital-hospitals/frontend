@@ -718,7 +718,8 @@ def gen_res_alloc_plots(selected, width, time_unit, data):
                     df,
                     x=f'Time ({time_unit})',
                     y='# Allocated',
-                    title=res
+                    title=res,
+                    render_mode='svg'
                 ).update_traces(
                     line_shape="hv"
                 )
@@ -755,6 +756,7 @@ def gen_wip_plots(selected, width, time_unit, data):
                     x="index",
                     y=stage,
                     title=stage,
+                    render_mode='svg'
                 ).update_traces(
                     line_shape="hv"
                 ).update_xaxes(
@@ -773,11 +775,38 @@ def gen_wip_plots(selected, width, time_unit, data):
     Output('container-util-hourly', 'children'),
     Input('multi-dropdown-util-hourly', 'value'),  # Multi-select: which plots to display
     Input('view-util-hourly-layout-value', 'data'),  # Store: display width
+    Input('select-util-hourly-timeunit', 'value'),  # Store: x-axis time unit
     State('scenario-report', 'data')  # Simulation results
 )
 @composition
-def gen_util_hourly_plots(selected, width, data):
+def gen_util_hourly_plots(selected, width, time_unit, data):
     """Generate plots for resource allocations over time."""
+    cols = 12 if width == 'wide' else 6 if width == 'medium' else 4
+    scale = 168 if time_unit == 'weeks' else 24 if time_unit == 'days' else 1
+    charts_data = kpis.Report.model_validate_json(data).hourly_utilization_by_resource
+    df = pd.DataFrame(
+        data=np.array(charts_data.y).T,
+        index=np.array(charts_data.x)/scale,
+        columns=charts_data.labels
+    ).reset_index()
     with dbc.Container(fluid=True) as ret:
-        yield dcc.Markdown(PLOTS_TODO_MSG)  # TODO populate the container
+        with dbc.Row():  # Place all plots in a single Row as bootstrap will handle line wrapping
+            for resource in selected:
+                plot = px.line(
+                    df,
+                    x="index",
+                    y=resource,
+                    title=resource,
+                    render_mode='svg'
+                ).update_traces(
+                    line_shape="hv"
+                ).update_xaxes(
+                    title=f'Time ({time_unit})'
+                ).update_yaxes(
+                    title='Mean # busy (hourly)'
+                )
+                if time_unit == 'days':
+                    plot.update_xaxes(dtick=7, tick0=0)  # weekly ticks
+                with dbc.Col(width=cols):
+                    yield dcc.Graph(figure=plot)
     return ret
