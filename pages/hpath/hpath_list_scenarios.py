@@ -158,6 +158,9 @@ def load_scenarios(n_clicks) -> None:
         assert response.status_code == HTTPStatus.OK
         scenarios = response.json()
 
+        if scenarios == []:
+            return sc_df_init.to_dict('records')
+
         for val in scenarios:
             completed = isinstance(val['completed'], float) and not isnan(val['completed'])
             if isinstance(val['created'], float) and not isnan(val['created']):
@@ -170,4 +173,4 @@ def load_scenarios(n_clicks) -> None:
         return scenarios
     except:
         # TODO: display error messages on screen
-        return sc_df_init
+        return sc_df_init.to_dict('records')
